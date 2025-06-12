@@ -1,0 +1,35 @@
+import requests
+import datetime
+
+NEWS_API_KEY = "YOUR_NEWSAPI_KEY"
+
+def get_news():
+    url = "https://newsapi.org/v2/everything"
+    params = {
+        "q": "large language model OR LLM",
+        "language": "en",
+        "pageSize": 5,
+        "sortBy": "publishedAt",
+        "apiKey": NEWS_API_KEY
+    }
+    res = requests.get(url, params=params).json()
+    return [(a['title'], a['description'], a['url']) for a in res['articles']]
+
+def generate_news_html(news_list):
+    today = datetime.date.today().strftime('%Y-%m-%d')
+    html = f"""
+    <!DOCTYPE html>
+    <html><head><meta charset="UTF-8"><title>LLM 뉴스 - {today}</title></head>
+    <body>
+    <h1>📚 LLM 뉴스 ({today})</h1><ul>
+    """
+    for title, desc, url in news_list:
+        html += f"<li><b>{title}</b><br>{desc}<br><a href='{url}'>[원문 보기]</a><br><br></li>"
+    html += "</ul></body></html>"
+
+    with open("news.html", "w", encoding="utf-8") as f:
+        f.write(html)
+
+if __name__ == "__main__":
+    news = get_news()
+    generate_news_html(news)
