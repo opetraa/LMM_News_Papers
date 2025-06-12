@@ -18,7 +18,9 @@ def get_llm_news():
         "apiKey": NEWS_API_KEY
     }
     res = requests.get(url, params=params)
-    
+    print("📡 API 응답 상태코드:", res.status_code)
+    print("🧾 응답 본문 일부:", res.text[:300])  # 앞부분만 출력
+
     if res.status_code != 200:
         raise RuntimeError(f"❌ 뉴스 API 요청 실패: {res.status_code}\n{res.text}")
     
