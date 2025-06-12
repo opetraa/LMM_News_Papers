@@ -1,5 +1,8 @@
 name: Auto-update news.html daily
 
+permissions:
+  contents: write  # ✅ 이 줄 추가 (푸시 권한 부여)
+
 on:
   schedule:
     - cron: '0 3 * * *'  # 매일 새벽 3시 (UTC 기준)
