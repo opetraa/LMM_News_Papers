@@ -1,0 +1,35 @@
+name: Auto-update news.html daily
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # 매일 새벽 3시 (UTC 기준)
+  workflow_dispatch:      # 수동 실행 버튼도 포함
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: pip install python-dotenv requests
+
+    - name: Generate HTML
+      env:
+        NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+      run: python Generate_html.py
+
+    - name: Commit and push
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "actions@github.com"
+        git add news.html
+        git commit -m "🤖 자동 뉴스 업데이트 $(date '+%Y-%m-%d')" || echo "No changes"
+        git push
