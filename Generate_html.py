@@ -1,11 +1,11 @@
 import requests
 import datetime
 import os
-from dotenv import load_dotenv
 
-# === 1. API 키 불러오기 ===
-load_dotenv()
+# === 1. API 키 (GitHub Secrets에서 환경변수로 받아옴) ===
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
+if not NEWS_API_KEY:
+    raise ValueError("❌ 환경변수 NEWS_API_KEY가 설정되어 있지 않습니다.")
 
 # === 2. 뉴스 수집 ===
 def get_llm_news():
@@ -18,6 +18,10 @@ def get_llm_news():
         "apiKey": NEWS_API_KEY
     }
     res = requests.get(url, params=params)
+    
+    if res.status_code != 200:
+        raise RuntimeError(f"❌ 뉴스 API 요청 실패: {res.status_code}\n{res.text}")
+    
     data = res.json()
     articles = data.get("articles", [])
     return [(a["title"], a["description"], a["url"]) for a in articles]
@@ -37,16 +41,17 @@ def save_as_html(news_list):
       <ul>
     """
     for title, desc, url in news_list:
-        html += f"<li><b>{title}</b><br>{desc}<br><a href='{url}'>[원문]</a><br><br></li>\n"
+        html += f"<li><b>{title}</b><br>{desc or ''}<br><a href='{url}'>[원문]</a><br><br></li>\n"
+
     html += "</ul></body></html>"
 
-    # 절대경로 저장
-    save_path = r"E:\E_2025\LLM\Newspaper\news.html"
+    # GitHub Pages 루트에 저장
+    save_path = "news.html"
     with open(save_path, "w", encoding="utf-8") as f:
         f.write(html)
-    
+
     print("✅ news.html 생성 완료!")
-    print("📁 저장 위치:", save_path)
+    print("📄 파일 위치:", save_path)
 
 # === 4. 실행 ===
 if __name__ == "__main__":
